@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Water style</title>
+  <script type="text/javascript" src="./dat-gui/build/dat.gui.min.js"></script>
+  <script>
+    /*
+      Requirements
+      ===
+      - Simulation, animation and display of a number of particles, each being affected by forces as they travel and having a specified lifespan, after which the particle is removed from the simulation.
+      - Implement at a minimum gravity and an initial launching force for the particles.
+      - Create HTML controls to allow users to specify an emitter location with a preferred direction for launching new particles. The emitter should launch particles continually according to some density parameter (controlling number of particles per second to emit).
+      - The simulation should reset and restart on browser window refresh.
+      - You may choose to add other features to your particle system. These features are entirely up to you.
+    */
+
+    window.onload = function() {
+
+      // Initialise an empty canvas and place it on the page
+      var canvas = document.createElement("canvas");
+      var context = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      document.body.appendChild(canvas);
+
+      // Set up object to contain particles and track them
+      // Settings object contains items to be adjusted in browser
+      var particles = {},
+          particleIndex = 0,
+          settings = {
+            density: 100,
+            particleSize: 10,
+            startingX: canvas.width / 2,
+            startingY: canvas.height / 2,
+            gravity: 1,
+            bounceLevel: canvas.height * 0.75
+          };
+
+      // Attach dat-gui to control items
+      var obj = { x: 5 };
+      var gui = new dat.GUI();
+      gui.add(settings, 'density', 0, 200 );
+      gui.add(settings, 'particleSize', 1, 50 );
+      gui.add(settings, 'gravity', -2, 2 );
+      gui.add(settings, 'startingX', 0, canvas.width );
+      gui.add(settings, 'startingY', 0, canvas.height );
+      gui.add(settings, 'bounceLevel', 0, canvas.height );
+
+      // Set up a function to create multiple particles
+      function Particle() {
+        // Establish starting positions and velocities
+        this.x = settings.startingX;
+        this.y = settings.startingY;
+        this.vx = Math.random() * 10 - 5;
+        this.vy = Math.random() * 10 - 5; 
+
+        // Sprinkles... :D
+        if (Math.random() > 0.98) {
+          this.vy *= 3;
+        }
+
+        // Add new particle to the index
+        // Object used as it's simpler to manage that an array
+        particleIndex ++;
+        particles[particleIndex] = this;
+        this.id = particleIndex;
+        this.life = 0;
+        this.maxLife = Math.random() * 120;
+      }
+
+      // Some prototype methods for the particle function
+      Particle.prototype.draw = function() {
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        // Give the particle some bounce
+        if (this.y > settings.bounceLevel) {
+          this.vy *= -0.6;
+          this.vx *= 0.75;
+          this.y = settings.bounceLevel;
+        }
+
+        // Adjust for gravity
+        this.vy += settings.gravity;
+
+        // Age the particle
+        this.life++;
+
+        // If Particle is old, it goes in the chamber for renewal
+        if (this.life >= this.maxLife) {
+          delete particles[this.id];
+        }
+
+        // Create the shapes
+        context.fillStyle = "rgba("+parseInt(Math.random() * 20 + 150)+","+parseInt(Math.random() * 20 + 150)+",255,0.4)";
+        context.fillRect(this.x, this.y, settings.particleSize, settings.particleSize)
+      }
+
+      setInterval(function() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the particles
+        for (var i = 0; i < settings.density; i++) {
+          new Particle();
+        }
+
+        for (var i in particles) {
+          particles[i].draw();
+        }
+      }, 30);
+
+    };
+
+  </script>
+  <style>
+    body {
+      margin: 0;
+      background: url(images/places_fountain.jpg) no-repeat center bottom;
+      background-size: 100% 100%;
+    }
+  </style>
+</head>
+<body></body>
+</html>
