@@ -20,7 +20,11 @@ They have also been tested on IE 10 / Windows 8.
 Some work-in-progress examples can be seen here:
 
 [http://hop.ie/particles/v01.html](http://hop.ie/particles/v01.html)
-[http://hop.ie/particles/v02.html](http://hop.ie/particles/v02.html)
+[http://hop.ie/particles/v02.html](http://hop.ie/particles/v02.html)]
+
+## Resources
+
+I would recommend [checking out this video](http://www.youtube.com/watch?v=YCI8uqePkrc) as a great introduction to canvas drawing.
 
 ## License
 
