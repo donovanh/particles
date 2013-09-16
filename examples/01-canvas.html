@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Blank canvas</title>
+  <script>
+    /*
+      Example 1: Setting up a canvas on the page
+    */
+    window.onload = function() {
+
+      // Initialise an empty canvas and place it on the page
+      var canvas = document.createElement("canvas");
+      var context = canvas.getContext("2d");
+      canvas.width = 800;
+      canvas.height = 500;
+      document.body.appendChild(canvas);
+
+      // Fill the canvas with a black background to show where it is
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+    };
+  </script>
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+<body></body>
+</html>
