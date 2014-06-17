@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <title>Settings</title>
-  <script src="./dat-gui/build/dat.gui.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
   <script>
     /*
       Example 7: Settings with dat.gui
@@ -33,7 +33,8 @@
             maxLife: 150,
             groundLevel: canvas.height * 0.75,
             leftWall: canvas.width * 0.25,
-            rightWall: canvas.width * 0.75
+            rightWall: canvas.width * 0.75,
+            blur: 0.5
           };
 
       // Attach dat-gui to control items
@@ -46,6 +47,7 @@
       gui.add(settings, 'groundLevel', 0, canvas.height );
       gui.add(settings, 'leftWall', 0, canvas.width * 0.4);
       gui.add(settings, 'rightWall', canvas.width * 0.6, canvas.width);
+      gui.add(settings, 'blur', 0.1, 0.9);
 
       // To optimise the previous script, generate some pseudo-random angles
       var seedsX = [];
@@ -85,7 +87,6 @@
           this.life = 0;
           this.maxLife = settings.maxLife;
         } else {
-          console.log('Generating more seed angles');
           seedAngles();
           currentAngle = 0;
         }
@@ -138,7 +139,8 @@
       }
 
       setInterval(function() {
-        context.fillStyle = "rgba(10,10,10,0.8)";
+        var blur = 1 - settings.blur;
+        context.fillStyle = "rgba(10,10,10,"+blur+")";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         // Draw a left, right walls and floor

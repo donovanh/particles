@@ -2,16 +2,10 @@
 <html lang="en">
 <head>
   <title>Bouncing balls</title>
-  <script type="text/javascript" src="./dat-gui/build/dat.gui.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
   <script>
     /*
-      Requirements
-      ===
-      - Simulation, animation and display of a number of particles, each being affected by forces as they travel and having a specified lifespan, after which the particle is removed from the simulation.
-      - Implement at a minimum gravity and an initial launching force for the particles.
-      - Create HTML controls to allow users to specify an emitter location with a preferred direction for launching new particles. The emitter should launch particles continually according to some density parameter (controlling number of particles per second to emit).
-      - The simulation should reset and restart on browser window refresh.
-      - You may choose to add other features to your particle system. These features are entirely up to you.
+      Example 7: Settings with dat.gui
     */
     window.onload = function() {
 
@@ -22,63 +16,83 @@
       canvas.height = window.innerHeight;
       document.body.appendChild(canvas);
 
-      // Some defaults
-      var radius = 30,
-          gravity = 0.5;
-      
-      // Set up object to contain particles and track them
+      // Inital starting position
+      var posX = 20,
+          posY = canvas.height / 2;
+
+      // No longer setting velocites as they will be random
+      // Set up object to contain particles and set some default values
       var particles = {},
           particleIndex = 0,
           settings = {
-            density: 20,
-            particleSize: 10,
+            density: 1,
+            particleSize: 5,
             startingX: canvas.width / 2,
             startingY: canvas.height / 4,
             gravity: 0.5,
+            maxLife: 150,
             groundLevel: canvas.height * 0.75,
-            direction: 'both',
             leftWall: canvas.width * 0.25,
-            rightWall: canvas.width * 0.75
+            rightWall: canvas.width * 0.75,
+            blur: 0.5
           };
 
       // Attach dat-gui to control items
       var obj = { x: 5 };
       var gui = new dat.GUI();
-      gui.add(settings, 'density', 0, 100 );
+      gui.add(settings, 'density', 0, 5 );
       gui.add(settings, 'particleSize', 1, 50 );
       gui.add(settings, 'gravity', -2, 2 );
       gui.add(settings, 'startingY', 0, canvas.height * 0.75 )
       gui.add(settings, 'groundLevel', 0, canvas.height );
-      gui.add(settings, 'direction', ['left', 'both', 'right']);
       gui.add(settings, 'leftWall', 0, canvas.width * 0.4);
       gui.add(settings, 'rightWall', canvas.width * 0.6, canvas.width);
+      gui.add(settings, 'blur', 0.1, 0.9);
+
+      // To optimise the previous script, generate some pseudo-random angles
+      var seedsX = [];
+      var seedsY = [];
+      var maxAngles = 100;
+      var currentAngle = 0;
+
+      function seedAngles() {
+        seedsX = [];
+        seedsY = [];
+        for (var i = 0; i < maxAngles; i++) {
+          seedsX.push(Math.random() * 20 - 10);
+          seedsY.push(Math.random() * 30 - 10);
+        }
+      }
+
+      // Start off with 100 angles ready to go
+      seedAngles();
 
       // Set up a function to create multiple particles
       function Particle() {
-        // Establish starting positions and velocities
-        this.x = settings.startingX;
-        this.y = settings.startingY;
+        if (currentAngle !== maxAngles) {
+          // Establish starting positions and velocities
+          this.x = settings.startingX;
+          this.y = settings.startingY;
 
-        // Determine original X-axis speed based on setting limitation
-        if (settings.direction == 'left') {
-          this.vx = Math.random() * -20;
-        } else if (settings.direction == 'right') {
-          this.vx = Math.random() * 20;
+          this.vx = seedsX[currentAngle];
+          this.vy = seedsY[currentAngle];
+
+          currentAngle++;
+
+          // Add new particle to the index
+          // Object used as it's simpler to manage that an array
+          particleIndex ++;
+          particles[particleIndex] = this;
+          this.id = particleIndex;
+          this.life = 0;
+          this.maxLife = settings.maxLife;
         } else {
-          this.vx = Math.random() * 20 - 5;
+          seedAngles();
+          currentAngle = 0;
         }
-        this.vy = Math.random() * 20 - 5;
-
-        // Add new particle to the index
-        // Object used as it's simpler to manage that an array
-        particleIndex ++;
-        particles[particleIndex] = this;
-        this.id = particleIndex;
-        this.life = 0;
-        this.maxLife = Math.random() * 280;
       }
 
-      // Some prototype methods for the particle function
+      // Some prototype methods for the particle's "draw" function
       Particle.prototype.draw = function() {
         this.x += this.vx;
         this.y += this.vy;
@@ -122,11 +136,11 @@
         context.arc(this.x, this.y, settings.particleSize, 0, Math.PI*2, true); 
         context.closePath();
         context.fill();
-
       }
 
       setInterval(function() {
-        context.fillStyle = "rgba(10,10,10,0.8)";
+        var blur = 1 - settings.blur;
+        context.fillStyle = "rgba(10,10,10,"+blur+")";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         // Draw a left, right walls and floor
@@ -137,18 +151,14 @@
 
         // Draw the particles
         for (var i = 0; i < settings.density; i++) {
-          if (Math.random() > 0.97) {
-            // Introducing a random chance of creating a particle
-            // corresponding to an chance of 1 per second,
-            // per "density" value
-            new Particle();
-          }
+          new Particle();
         }
 
         for (var i in particles) {
           particles[i].draw();
         }
       }, 30);
+
 
     };
   </script>
